@@ -79,12 +79,14 @@ def convert_speech2sing(inputfile,musicxmlfile,outputfile,
     else:
         src_notes = mxml.musicxml_to_df(musicxmlfile,default_bpm=bpm,force_default_bpm=True)
 
-    notes,pitches = noteseq(src_notes)
+    notes,pitches,note_start,note_end = noteseq(src_notes)
     mapper = {0:0, 1:10, 2:2}
     print("Voiced/Unvoiced classification")
     vuv0 = model.predict(inputfile)
     vuv1 = [mapper[x] for x in vuv0]
     opt = dtw.dtw(vuv1,notes,uv_val=2)
+    for i in range(len(note_start)):
+        print(f"note #{i}: start={opt[note_start[i]][0]} end={opt[note_end[i]][0]}")
     np.save("z_opt.npy",np.array(opt))
     N = len(pitches)
     sp = np.zeros((N*4,anl["spectrum"].shape[1]))

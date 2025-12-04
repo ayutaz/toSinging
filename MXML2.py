@@ -1,6 +1,5 @@
 import music21
 import pandas as pd
-import math
 
 def musicxml_to_df(musicxml_path, 
                    ms_unit = 20, 
@@ -56,6 +55,8 @@ def musicxml_to_df(musicxml_path,
         bpm = tempo.number
     print(f"bpm={bpm}")
     data = []
+    pos_start = 0 # 音符開始フレーム
+    pos_end = 0   # 音符終了フレーム
     for i in range(len(notes)):
         element = notes[i]
         # 音名または休符を取得
@@ -83,18 +84,21 @@ def musicxml_to_df(musicxml_path,
         # round()は正確な丸め（四捨五入）を行いますが、ここでは最も近い単位の倍数に丸めます。
         # 例: ms_unit=20の場合、43ms -> 40ms, 47ms -> 60ms
         rounded_duration_units = round(duration_ms / ms_unit)
+        duration = int(rounded_duration_units)
+        pos_end = pos_start+duration-1
 
         # 結果をリストに追加
-        data.append([pitch_name, int(rounded_duration_units)])
+        data.append([pitch_name, duration, pos_start, pos_end])
+        pos_start = pos_end+1
 
     # 7. Pandas DataFrameを作成し、CSVに出力
-    df = pd.DataFrame(data, columns=["pitch", "duration"])    
+    df = pd.DataFrame(data, columns=["pitch", "duration","start","end"])    
     return df
 
 if __name__ == "__main__":
     # 実行するMusicXMLファイルのパスを指定してください
-    musicxml_file = "unnamed1.musicxml" 
+    musicxml_file = "sample.musicxml" 
 
     # 20ms単位で計算を実行
-    df = musicxml_to_df(musicxml_file, ms_unit=5)
+    df = musicxml_to_df(musicxml_file, ms_unit=20)
     print(df)

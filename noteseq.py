@@ -47,7 +47,7 @@ def noteseq(x, high=10, low=2):
             out.extend(decay(seq_vals))
             p.extend([pitch]*duration)
 
-    return (np.array(out),np.array(p)) # Pythonのリストを最後にNumPy配列に変換して返す
+    return (np.array(out),np.array(p),x['start'],x['end']) # Pythonのリストを最後にNumPy配列に変換して返す
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
