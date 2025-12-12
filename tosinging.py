@@ -106,14 +106,17 @@ def convert_speech2sing(inputfile,musicxmlfile,outputfile,
     f0 = np.zeros(N*4)
     vu = np.zeros(N*4)
     org_f0 = np.zeros(N*4)
+    # Optimized: use slice operations instead of inner loop
     for i in range(N):
         idx = int(orgidx[i])
-        for j in range(4):
-            sp[i*4+j,:] = anl["spectrum"][idx*4+j,:]
-            ap[i*4+j,:] = anl["aperiodicity"][idx*4+j,:]
-            f0[i*4+j] = pitches[opt[i][1]]
-            vu[i*4+j] = vuv0[opt[i][0]]
-            org_f0[i*4+j] = anl["f0"][idx*4+j]
+        src_slice = slice(idx * 4, idx * 4 + 4)
+        dst_slice = slice(i * 4, i * 4 + 4)
+
+        sp[dst_slice, :] = anl["spectrum"][src_slice, :]
+        ap[dst_slice, :] = anl["aperiodicity"][src_slice, :]
+        f0[dst_slice] = pitches[opt[i][1]]
+        vu[dst_slice] = vuv0[opt[i][0]]
+        org_f0[dst_slice] = anl["f0"][src_slice]
     f0 = np.ascontiguousarray(vibration.add_dumping(f0))
     anl2 = {"f0":f0,"spectrum":sp, "aperiodicity":ap, "rate":sr, "vuv": vu, "org_f0": org_f0}
     print("Synthesizing singing voice")
