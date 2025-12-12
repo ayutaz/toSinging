@@ -4,6 +4,18 @@ import HuBERT_VUV as hub
 import soundfile as sf
 import librosa
 
+# モデルキャッシュ（複数ファイル処理時の高速化用）
+_model_cache = {}
+
+
+def get_cached_model(model_path, model_name, num_classes, sampling_rate):
+    """キャッシュされたモデルを取得、なければ新規作成"""
+    cache_key = (model_path, model_name, num_classes, sampling_rate)
+    if cache_key not in _model_cache:
+        _model_cache[cache_key] = VUVmodel(model_path, model_name, num_classes, sampling_rate)
+    return _model_cache[cache_key]
+
+
 class VUVmodel:
     def __init__(self,model_path,model_name, num_classes, sampling_rate):
         """保存されたモデルの重みをロードする関数"""

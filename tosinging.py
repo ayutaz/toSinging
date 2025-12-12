@@ -10,6 +10,9 @@ import sys
 import vibration
 import stretch
 
+# ターゲットサンプリングレート
+TARGET_SR = 16000
+
 def analyze(wavfile=None,w=None,sr=None,fftspec=False):
     assert not (w is None) or not (wavfile is None), "Either w or wavfile should be specified"
     if w is None:
@@ -65,14 +68,26 @@ def synthesize(anl,replace_ap = True):
 
     return pw.synthesize(f0,anl["spectrum"],ap,anl["rate"])
 
+def load_audio_fast(filepath, target_sr=TARGET_SR):
+    """soundfileで読み込み後リサンプリング（librosa.loadより高速）"""
+    w, sr = sf.read(filepath)
+    if sr != target_sr:
+        w = librosa.resample(w, orig_sr=sr, target_sr=target_sr)
+    return w, target_sr
+
+
 def convert_speech2sing(inputfile,musicxmlfile,outputfile,
                         modelfile,modelname,
                         transpose=0,
-                        bpm=None):
+                        bpm=None,
+                        use_cached_model=True):
     print("Reading model...")
-    model = vuv.VUVmodel(modelfile,modelname,3,16000) 
+    if use_cached_model:
+        model = vuv.get_cached_model(modelfile,modelname,3,TARGET_SR)
+    else:
+        model = vuv.VUVmodel(modelfile,modelname,3,TARGET_SR)
     print(f"Input file: {inputfile}")
-    w, sr = librosa.load(inputfile,sr=16000)
+    w, sr = load_audio_fast(inputfile, TARGET_SR)
     anl = analyze(w=w,sr=sr)
 
     print(f"MusicXML file: {musicxmlfile}")
