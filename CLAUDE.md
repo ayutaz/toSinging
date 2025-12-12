@@ -11,14 +11,17 @@ toSingingは、任意の話し声を歌声に変換する言語非依存の音�
 ## コマンド
 
 ```bash
+# 環境構築
+uv sync
+
 # 基本的な実行
-python tosinging.py -i input.wav -m input.musicxml
+uv run python tosinging.py -i input.wav -m input.musicxml
 
 # オプション付き
-python tosinging.py -i input.wav -m input.musicxml -o output.wav -bpm 120 -trans 0
+uv run python tosinging.py -i input.wav -m input.musicxml -o output.wav -bpm 120 -trans 0
 
-# 依存関係のインストール
-pip install -r requirements.txt
+# パッケージ追加
+uv add <package-name>
 ```
 
 ### オプション
